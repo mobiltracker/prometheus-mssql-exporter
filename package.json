@@ -26,12 +26,12 @@
     "build": "docker build . -t awaragi/prometheus-mssql-exporter"
   },
   "dependencies": {
-    "debug": "^2.6.8",
-    "express": "4.15.2",
-    "prom-client": "9.1.1",
-    "tedious": "2.0.0"
+    "debug": "^4.3.3",
+    "express": "4.17.2",
+    "prom-client": "14.0.1",
+    "tedious": "14.0.0"
   },
   "devDependencies": {
-    "nodemon": "^1.11.0"
+    "nodemon": "^2.0.15"
   }
 }
