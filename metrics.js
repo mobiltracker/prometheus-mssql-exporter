@@ -49,7 +49,7 @@ const mssql_deadlocks = {
 FROM sys.dm_os_performance_counters
 where counter_name = 'Number of Deadlocks/sec' AND instance_name = '_Total'`,
     collect: function (rows, metrics) {
-        const mssql_deadlocks = rows[0][0].value;
+        const mssql_deadlocks = +rows[0][0].value;
         debug("Fetch number of deadlocks/sec", mssql_deadlocks);
         metrics.mssql_deadlocks_per_second.set(mssql_deadlocks)
     }
@@ -63,7 +63,7 @@ const mssql_user_errors = {
 FROM sys.dm_os_performance_counters
 where counter_name = 'Errors/sec' AND instance_name = 'User Errors'`,
     collect: function (rows, metrics) {
-        const mssql_user_errors = rows[0][0].value;
+        const mssql_user_errors = +rows[0][0].value;
         debug("Fetch number of user errors/sec", mssql_user_errors);
         metrics.mssql_user_errors.set(mssql_user_errors)
     }
@@ -77,7 +77,7 @@ const mssql_kill_connection_errors = {
 FROM sys.dm_os_performance_counters
 where counter_name = 'Errors/sec' AND instance_name = 'Kill Connection Errors'`,
     collect: function (rows, metrics) {
-        const mssql_kill_connection_errors = rows[0][0].value;
+        const mssql_kill_connection_errors = +rows[0][0].value;
         debug("Fetch number of kill connection errors/sec", mssql_kill_connection_errors);
         metrics.mssql_kill_connection_errors.set(mssql_kill_connection_errors)
     }
@@ -110,7 +110,7 @@ and  instance_name <> '_Total'`,
         for (let i = 0; i < rows.length; i++) {
             const row = rows[i];
             const database = row[0].value;
-            const mssql_log_growths = row[1].value;
+            const mssql_log_growths = +row[1].value;
             debug("Fetch number log growths for database", database);
             metrics.mssql_log_growths.set({database: database}, mssql_log_growths);
         }
@@ -143,7 +143,7 @@ const mssql_page_life_expectancy = {
     query: `SELECT TOP 1  cntr_value
 FROM sys.dm_os_performance_counters with (nolock)where counter_name='Page life expectancy'`,
     collect: function (rows, metrics) {
-        const mssql_page_life_expectancy = rows[0][0].value;
+        const mssql_page_life_expectancy = +rows[0][0].value;
         debug("Fetch page life expectancy", mssql_page_life_expectancy);
         metrics.mssql_page_life_expectancy.set(mssql_page_life_expectancy)
     }
@@ -169,11 +169,11 @@ group by a.database_id`,
         for (let i = 0; i < rows.length; i++) {
             const row = rows[i];
             const database = row[0].value;
-            const read = row[1].value;
-            const write = row[2].value;
-            const stall = row[3].value;
-            const queued_read = row[4].value;
-            const queued_write = row[5].value;
+            const read = +row[1].value;
+            const write = +row[2].value;
+            const stall = +row[3].value;
+            const queued_read = +row[4].value;
+            const queued_write = +row[5].value;
             debug("Fetch number of stalls for database", database);
             metrics.mssql_io_stall_total.set({database: database}, stall);
             metrics.mssql_io_stall.set({database: database, type: "read"}, read);
@@ -193,7 +193,7 @@ FROM sys.dm_os_performance_counters where counter_name = 'Batch Requests/sec'`,
     collect: function (rows, metrics) {
         for (let i = 0; i < rows.length; i++) {
             const row = rows[i];
-            const mssql_batch_requests = row[0].value;
+            const mssql_batch_requests = +row[0].value;
             debug("Fetch number of batch requests per second", mssql_batch_requests);
             metrics.mssql_batch_requests.set(mssql_batch_requests);
         }
@@ -208,8 +208,8 @@ const mssql_os_process_memory = {
     query: `SELECT page_fault_count, memory_utilization_percentage 
 from sys.dm_os_process_memory`,
     collect: function (rows, metrics) {
-        const page_fault_count = rows[0][0].value;
-        const memory_utilization_percentage = rows[0][1].value;
+        const page_fault_count = +rows[0][0].value;
+        const memory_utilization_percentage = +rows[0][1].value;
         debug("Fetch page fault count", page_fault_count);
         metrics.mssql_page_fault_count.set(page_fault_count);
         metrics.mssql_memory_utilization_percentage.set(memory_utilization_percentage);
@@ -226,10 +226,10 @@ const mssql_os_sys_memory = {
     query: `SELECT total_physical_memory_kb, available_physical_memory_kb, total_page_file_kb, available_page_file_kb 
 from sys.dm_os_sys_memory`,
     collect: function (rows, metrics) {
-        const mssql_total_physical_memory_kb = rows[0][0].value;
-        const mssql_available_physical_memory_kb = rows[0][1].value;
-        const mssql_total_page_file_kb = rows[0][2].value;
-        const mssql_available_page_file_kb = rows[0][3].value;
+        const mssql_total_physical_memory_kb = +rows[0][0].value;
+        const mssql_available_physical_memory_kb = +rows[0][1].value;
+        const mssql_total_page_file_kb = +rows[0][2].value;
+        const mssql_available_page_file_kb = +rows[0][3].value;
         debug("Fetch system memory information");
         metrics.mssql_total_physical_memory_kb.set(mssql_total_physical_memory_kb);
         metrics.mssql_available_physical_memory_kb.set(mssql_available_physical_memory_kb);

@@ -10,10 +10,15 @@ const metrics = require('./metrics').metrics;
 let config = {
     connect: {
         server: process.env["SERVER"],
-        userName: process.env["USERNAME"],
-        password: process.env["PASSWORD"],
+        authentication: {
+            type: "default",
+            options: {  
+                userName: process.env["USERNAME"],
+                password: process.env["PASSWORD"],
+            }
+        },
         options: {
-            port: process.env["PORT"] || 1433,
+            port: process.env["PORT"] ? Number(process.env["PORT"]) : 1433,
             encrypt: true,
             rowCollectionOnRequestCompletion: true
         }
@@ -24,10 +29,10 @@ let config = {
 if (!config.connect.server) {
     throw new Error("Missing SERVER information")
 }
-if (!config.connect.userName) {
+if (!config.connect.authentication.options.userName) {
     throw new Error("Missing USERNAME information")
 }
-if (!config.connect.password) {
+if (!config.connect.authentication.options.password) {
     throw new Error("Missing PASSWORD information")
 }
 
@@ -52,6 +57,7 @@ async function connect() {
         connection.on('end', () => {
             debug("Connection to database ended");
         });
+        connection.connect();
     });
 
 }
@@ -100,7 +106,7 @@ app.get('/metrics', async (req, res) => {
         let connection = await connect();
         await collect(connection, metrics);
         connection.close();
-        res.send(client.register.metrics());
+        res.send(await client.register.metrics());
     } catch (error) {
         // error connecting
         up.set(0);
@@ -110,7 +116,7 @@ app.get('/metrics', async (req, res) => {
 });
 
 const server = app.listen(config.port, function () {
-    debug(`Prometheus-MSSQL Exporter listening on local port ${config.port} monitoring ${config.connect.userName}@${config.connect.server}:${config.connect.options.port}`);
+    debug(`Prometheus-MSSQL Exporter listening on local port ${config.port} monitoring ${config.connect.authentication.options.userName}@${config.connect.server}:${config.connect.options.port}`);
 });
 
 process.on('SIGINT', function () {
