@@ -13,7 +13,7 @@ let config = {
         authentication: {
             type: "default",
             options: {  
-                userName: process.env["USERNAME"],
+                userName: process.env["USER_ID"] || process.env["USERNAME"],
                 password: process.env["PASSWORD"],
             }
         },
