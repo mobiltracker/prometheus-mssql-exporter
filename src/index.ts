@@ -1,16 +1,20 @@
 import { Connection, Request } from "tedious";
 import express from "express";
 import Debug from "debug";
-
-import { client, up, metrics } from "./metrics";
+import client from "prom-client";
+import "./typings/prom-client";
 
 import type { Collector } from "./Collector";
-import "./typings/prom-client";
+
+import { createMetricsCollectors } from "./metrics";
 
 const debug = Debug("app");
 const app = express();
 
 let config = {
+  metrics: {
+    supportMsSql2012: process.env["SUPPORT_2012"] === "1",
+  },
   connect: {
     server: process.env["SERVER"],
     authentication: {
@@ -100,6 +104,11 @@ async function collect(connection: Connection) {
     await measure(connection, metrics[i]);
   }
 }
+
+// UP metric
+const up = new client.Gauge({ name: "up", help: "UP Status" });
+// Query based metrics
+const metrics = createMetricsCollectors(config.metrics);
 
 app.get("/metrics", async (req, res) => {
   res.contentType(client.register.contentType);
