@@ -23,7 +23,7 @@
     "url": "https://github.com/awaragi/prometheus-mssql-exporter/issues"
   },
   "scripts": {
-    "build": "docker build . -t awaragi/prometheus-mssql-exporter",
+    "tsc-build": "tsc",
     "dev": "nodemon -r dotenv/config ./src/index.ts",
     "help": "ts-node ./src/metrics.ts"
   },

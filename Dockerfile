@@ -1,20 +1,43 @@
-FROM node:8.4.0-alpine
-MAINTAINER Pierre Awaragi (pierre@awaragi.com)
+###
+# builder image
+FROM node:16-alpine as builder
 
-# Create a directory where our app will be placed
-RUN mkdir -p /usr/src/app
+# directory app will be built
+WORKDIR /home/app
 
-# Change directory so that our commands run inside this new directory
-WORKDIR /usr/src/app
+# copy dependency definitions
+COPY package.json package-lock.json /home/app/
 
-# Copy dependency definitions
-COPY package.json *.js /usr/src/app/
+# install all dependencies
+RUN npm install
 
-# Install dependecies
+# copy typescript build config
+COPY tsconfig.json /home/app/
+
+# copy app source
+COPY src /home/app/src
+
+# build app
+RUN npm run tsc-build
+
+###
+# final image
+FROM node:16-alpine
+
+# directory app will be placed
+WORKDIR /home/app
+
+# copy built app from builder
+COPY --from=builder /home/app/package.json /home/app/package-lock.json /home/app/dist ./
+
+# Install production dependecies
 RUN npm install --production
 
 # Expose the port the app runs in
 EXPOSE 4000
 
 # Serve the app
-CMD ["node", "index.js"]
+ENTRYPOINT ["node", "index.js"]
+
+# Enable passing extra arguments as CMD (ex. v8-options)
+CMD []

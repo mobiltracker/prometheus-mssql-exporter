@@ -27,7 +27,7 @@ Please feel free to submit other interesting metrics to include.
 Usage
 -----
 
-`docker run -e SERVER=192.168.56.101 -e USERNAME=SA -e PASSWORD=qkD4x3yy -e DEBUG=app -p 4000:4000 --name prometheus-mssql-exporter awaragi/prometheus-mssql-exporter`
+`docker run -e SERVER=192.168.56.101 -e USERNAME=SA -e PASSWORD=qkD4x3yy -e DEBUG=app -e SUPPORT_2012=1 -p 4000:4000 --name prometheus-mssql-exporter awaragi/prometheus-mssql-exporter`
 
 The image supports the following environments and exposes port 4000
 
@@ -36,6 +36,7 @@ The image supports the following environments and exposes port 4000
 * **USERNAME** access user (required)
 * **PASSWORD** access password (required)
 * **DEBUG** comma delimited list of enabled logs (optional currently supports app and metrics)
+* **SUPPORT_2012** set it to 1 to enable support to SQL Server 2012
 
 It is **_required_** that the specified user has the following permissions
 
