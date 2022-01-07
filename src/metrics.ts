@@ -362,6 +362,48 @@ export function createMetricsCollectors(
     },
   };
 
+  const mssql_oldest_transaction_age: Collector<{
+    mssql_oldest_transaction_age: "database";
+  }> = {
+    metrics: {
+      mssql_oldest_transaction_age: new client.Gauge({
+        name: "mssql_oldest_transactions",
+        help: "Age of the oldest transaction by database in seconds",
+        labelNames: ["database"],
+      }),
+    },
+    query: `
+SELECT DB_NAME(db.database_id) as 'database'
+     , ISNULL(trans.tran_elapsed_time_seconds, 0)
+  FROM sys.databases db
+  LEFT JOIN (
+       SELECT max(DATEDIFF(SECOND, transaction_begin_time, GETDATE())) as tran_elapsed_time_seconds
+            , tdt.database_id
+         FROM sys.dm_tran_active_transactions tat
+         JOIN sys.dm_tran_database_transactions tdt
+           ON tat.transaction_id = tdt.transaction_id
+         JOIN sys.dm_tran_session_transactions tst
+           ON tat.transaction_id = tst.transaction_id
+        GROUP BY tdt.database_id
+     ) trans
+    ON db.database_id = trans.database_id
+`,
+    collect: function (rows, metrics) {
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const database = row[0].value;
+        const transactions_age = +row[1].value;
+        debug("Fetch oldest transaction for database ", database);
+        metrics.mssql_oldest_transaction_age.set(
+          {
+            database: database,
+          },
+          transactions_age
+        );
+      }
+    },
+  };
+
   const metrics: Collector<any>[] = [
     mssql_instance_local_time,
     mssql_connections,
@@ -376,6 +418,7 @@ export function createMetricsCollectors(
     mssql_batch_requests,
     mssql_os_process_memory,
     mssql_os_sys_memory,
+    mssql_oldest_transaction_age,
   ];
 
   return metrics;
