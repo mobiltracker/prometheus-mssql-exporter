@@ -404,6 +404,51 @@ SELECT DB_NAME(db.database_id) as 'database'
     },
   };
 
+  const mssql_volume_stats: Collector<{
+    mssql_volume_total_bytes: "volume_mount_point";
+    mssql_volume_available_bytes: "volume_mount_point";
+  }> = {
+    metrics: {
+      mssql_volume_total_bytes: new client.Gauge({
+        name: "mssql_volume_total_bytes",
+        help: "Total size in bytes of the volume",
+        labelNames: ["volume_mount_point"],
+      }),
+      mssql_volume_available_bytes: new client.Gauge({
+        name: "mssql_volume_available_bytes",
+        help: "Available free space on the volume",
+        labelNames: ["volume_mount_point"],
+      }),
+    },
+    query: `
+SELECT distinct(volume_mount_point)
+     , total_bytes
+     , available_bytes
+  FROM sys.master_files AS f CROSS APPLY
+       sys.dm_os_volume_stats(f.database_id, f.file_id)
+ GROUP by volume_mount_point
+     , total_bytes
+     , available_bytes
+`,
+    collect: function (rows, metrics) {
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const volume_mount_point = row[0].value;
+        const total_bytes = +row[1].value;
+        const available_bytes = +row[2].value;
+        debug("Fetch volume stats for volume_mount_point ", volume_mount_point);
+        metrics.mssql_volume_total_bytes.set(
+          { volume_mount_point },
+          total_bytes
+        );
+        metrics.mssql_volume_available_bytes.set(
+          { volume_mount_point },
+          available_bytes
+        );
+      }
+    },
+  };
+
   const metrics: Collector<any>[] = [
     mssql_instance_local_time,
     mssql_connections,
@@ -419,6 +464,7 @@ SELECT DB_NAME(db.database_id) as 'database'
     mssql_os_process_memory,
     mssql_os_sys_memory,
     mssql_oldest_transaction_age,
+    mssql_volume_stats
   ];
 
   return metrics;
