@@ -30,4 +30,4 @@ jobs:
           push: true
           tags: |
             mobiltracker/prometheus-mssql-exporter:latest
-            mobiltracker/prometheus-mssql-exporter:${RELEASE_TAG}
+            mobiltracker/prometheus-mssql-exporter:${{ env.RELEASE_TAG }}
