@@ -126,6 +126,10 @@ app.get("/metrics", async (req, res) => {
   }
 });
 
+app.get("/health", async (req, res) => {
+  res.send("Ok");
+});
+
 const server = app.listen(config.port, function () {
   debug(
     `Prometheus-MSSQL Exporter listening on local port ${config.port} monitoring ${config.connect.authentication.options.userName}@${config.connect.server}:${config.connect.options.port}`
