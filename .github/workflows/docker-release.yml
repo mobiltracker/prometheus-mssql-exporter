@@ -26,5 +26,6 @@ jobs:
           context: .
           push: true
           tags: |
+            RELEASE_TAG=${GITHUB_REF#refs/tags/}
             mobiltracker/prometheus-mssql-exporter:latest
-            mobiltracker/prometheus-mssql-exporter:${GITHUB_REF#refs/tags/}
+            mobiltracker/prometheus-mssql-exporter:${RELEASE_TAG}
