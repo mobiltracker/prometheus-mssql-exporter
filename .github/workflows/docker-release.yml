@@ -25,4 +25,4 @@ jobs:
           push: true
           tags: |
             mobiltracker/prometheus-mssql-exporter:latest
-            mobiltracker/prometheus-mssql-exporter:${{ github.ref_name }}
+            mobiltracker/prometheus-mssql-exporter:${{ github.ref }}
