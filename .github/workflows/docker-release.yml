@@ -20,9 +20,11 @@ jobs:
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3.0.0
+        env:
+          GITHUB_REF: ${{ github.ref }}
         with:
           context: .
           push: true
           tags: |
             mobiltracker/prometheus-mssql-exporter:latest
-            mobiltracker/prometheus-mssql-exporter:${{ github.ref }}
+            mobiltracker/prometheus-mssql-exporter:${GITHUB_REF#refs/tags/}
